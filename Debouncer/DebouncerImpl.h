@@ -57,7 +57,7 @@ private:
 
 public:
 
-    Debouncer(uint8_t pin, uint16_t duration_ms, Active active = Active::L, DurationFrom mode = DurationFrom::STABLE)
+    Debouncer(const int8_t pin, const uint16_t duration_ms, const Active active = Active::L, const DurationFrom mode = DurationFrom::STABLE)
     : pin_target(pin)
     , duration_ms(duration_ms)
     , unstable_change_begin_ms(0xFFFFFFFF)
@@ -69,21 +69,22 @@ public:
     , mode(mode)
     {}
 
-    bool read() { return stable_state; }
+    bool read() const { return stable_state; }
 
-    bool edge() { return is_stable_edge; }
-    bool rising() { return (stable_state == HIGH) && is_stable_edge; }
-    bool falling() { return (stable_state == LOW) && is_stable_edge; }
+    bool edge() const { return is_stable_edge; }
+    bool rising() const { return (stable_state == HIGH) && is_stable_edge; }
+    bool falling() const { return (stable_state == LOW) && is_stable_edge; }
 
     void update()
     {
-        bool curr_state = digitalRead(pin_target);
+        const bool curr_state = digitalRead(pin_target);
+        const uint32_t curr_ms = millis();
         is_stable_edge = false;
 
         if (curr_state != prev_state)
         {
-            if (!is_unstable) unstable_change_begin_ms = millis();
-            unstable_change_end_ms = millis();
+            if (!is_unstable) unstable_change_begin_ms = curr_ms;
+            unstable_change_end_ms = curr_ms;
             is_unstable = true;
             prev_state = curr_state;
         }
@@ -95,7 +96,7 @@ public:
                 if (mode == DurationFrom::STABLE) prev_ms = unstable_change_end_ms;
                 else                              prev_ms = unstable_change_begin_ms;
 
-                if ((millis() - prev_ms) > duration_ms)
+                if ((curr_ms - prev_ms) > duration_ms)
                 {
                     if (is_unstable)
                     {
@@ -114,14 +115,14 @@ public:
                         // auto p = callbacks.equal_range((bool)edge);
                         // for (auto it = p.first; it != p.second; ++it) it->second();
 
-                        for (auto& c : callbacks) if (edge == c.key) c.func();
+                        for (const auto& c : callbacks) if (edge == c.key) c.func();
                     }
                 }
             }
         }
     }
 
-    void subscribe(Edge edge, CallbackType func)
+    void subscribe(const Edge edge, const CallbackType func)
     {
         // TODO: std::multimap couldn't build on teensy...
         // callbacks.emplace(std::make_pair(edge, func));
