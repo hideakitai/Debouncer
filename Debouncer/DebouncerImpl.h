@@ -3,6 +3,7 @@
 #define DEBOUNCERIMPL_H
 
 #include <Arduino.h>
+#include <util/atomic.h>
 #ifdef __AVR__
 #include "RingBuffer.h"
 #else
@@ -77,8 +78,16 @@ public:
 
     void update()
     {
-        const bool curr_state = digitalRead(pin_target);
-        const uint32_t curr_ms = millis();
+        bool curr_state = digitalRead(pin_target);
+        uint32_t curr_ms = millis();
+
+        // Temporarily disable interrupts to ensure an accurate time stamp for the sample.
+        ATOMIC_BLOCK( ATOMIC_RESTORESTATE )
+        {
+          noInterrupts();
+          curr_state = digitalRead(pin_target);  // No interrupt will occur between here...
+          curr_ms = millis();                    // ...and here, ensuring an accurate time stamp for the sample.
+        }
         is_stable_edge = false;
 
         if (curr_state != prev_state)
