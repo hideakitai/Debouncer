@@ -82,9 +82,8 @@ public:
         uint32_t curr_ms = millis();
 
         // Temporarily disable interrupts to ensure an accurate time stamp for the sample.
-        ATOMIC_BLOCK( ATOMIC_RESTORESTATE )
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
         {
-          noInterrupts();
           curr_state = digitalRead(pin_target);  // No interrupt will occur between here...
           curr_ms = millis();                    // ...and here, ensuring an accurate time stamp for the sample.
         }
