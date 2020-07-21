@@ -58,7 +58,7 @@ private:
 
 public:
 
-    Debouncer(const int8_t pin, const uint16_t duration_ms, const Active active = Active::L, const DurationFrom mode = DurationFrom::STABLE)
+    Debouncer(const uint8_t pin, const uint16_t duration_ms, const Active active = Active::L, const DurationFrom mode = DurationFrom::STABLE)
     : pin_target(pin)
     , duration_ms(duration_ms)
     , unstable_change_begin_ms(0xFFFFFFFF)
