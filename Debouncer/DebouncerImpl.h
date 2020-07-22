@@ -141,7 +141,7 @@ private:
 
     const uint8_t pin_target;
 
-    uint32_t duration_ms;
+    const uint32_t duration_ms;
     uint32_t unstable_change_begin_ms;
     uint32_t unstable_change_end_ms;
 
