@@ -78,8 +78,8 @@ public:
 
     void update()
     {
-        bool curr_state = digitalRead(pin_target);
-        uint32_t curr_ms = millis();
+        bool curr_state = false;
+        uint32_t curr_ms = 0;
 
         // Temporarily disable interrupts to ensure an accurate time stamp for the sample.
         ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
