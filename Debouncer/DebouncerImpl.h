@@ -82,11 +82,15 @@ public:
         uint32_t curr_ms = 0;
 
         // Temporarily disable interrupts to ensure an accurate time stamp for the sample.
+#ifdef ATOMIC_BLOCK
         ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
         {
-          curr_state = digitalRead(pin_target);  // No interrupt will occur between here...
-          curr_ms = millis();                    // ...and here, ensuring an accurate time stamp for the sample.
+#endif
+          input_state = digitalRead(input_pin);  // No interrupts will occur between here...
+          current_ms = millis();                 // ...and here, ensuring an accurate time stamp for the sample.
+#ifdef ATOMIC_BLOCK
         }
+#endif
         is_stable_edge = false;
 
         if (curr_state != prev_state)
