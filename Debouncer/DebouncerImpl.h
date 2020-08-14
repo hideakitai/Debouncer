@@ -3,8 +3,8 @@
 #define DEBOUNCERIMPL_H
 
 #include <Arduino.h>
-#include <util/atomic.h>
 #ifdef __AVR__
+#include <util/atomic.h>
 #include "RingBuffer.h"
 #else
 #include <functional>
@@ -81,14 +81,14 @@ public:
         bool curr_state = false;
         uint32_t curr_ms = 0;
 
-        // Temporarily disable interrupts to ensure an accurate time stamp for the sample.
-#ifdef ATOMIC_BLOCK
+        // For AVR, temporarily disable interrupts to ensure an accurate time stamp for the sample.
+#ifdef __AVR__
         ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
         {
 #endif
-          input_state = digitalRead(input_pin);  // No interrupts will occur between here...
-          current_ms = millis();                 // ...and here, ensuring an accurate time stamp for the sample.
-#ifdef ATOMIC_BLOCK
+          curr_state = digitalRead(pin_target);  // For AVR, no interrupts will occur between here...
+          curr_ms = millis();                    // ...and here, ensuring an accurate time stamp for the sample.
+#ifdef __AVR__
         }
 #endif
         is_stable_edge = false;
