@@ -11,17 +11,17 @@ public:
     enum class DurationMode {kStable, kTransition};
     enum class Edge {kFalling, kRising};
 
-    Debouncer(uint8_t pin, uint16_t interval_ms, DurationMode mode = kStable)
+    Debouncer(const uint8_t pin, const uint16_t interval_ms, const DurationMode mode = kStable)
     : pin_target(pin)
     , interval_ms(interval_ms)
     , mode(kStable)
     {}
 
-    bool read() { return stable_state; }
+    bool read() const { return stable_state; }
 
-    bool edge() { return is_stable_edge; }
-    bool rising() { return (stable_state == HIGH) && is_stable_edge; }
-    bool falling() { return (stable_state == LOW) && is_stable_edge; }
+    bool edge() const { return is_stable_edge; }
+    bool rising() const { return (stable_state == HIGH) && is_stable_edge; }
+    bool falling() const { return (stable_state == LOW) && is_stable_edge; }
 
     void update()
     {
@@ -73,7 +73,7 @@ public:
         return false;
     }
 
-    void addEdgeCallback(bool state, CallbackPtr callback)
+    void addEdgeCallback(const bool state, const CallbackPtr& callback)
     {
         if (num_callbacks < kMaxCallbacks)
         {
@@ -90,8 +90,8 @@ public:
 private:
 
     const uint8_t pin_target;
+    const uint32_t interval_ms;
 
-    uint32_t interval_ms;
     uint32_t unstable_change_begin_ms;
     uint32_t unstable_change_end_ms;
 
@@ -100,7 +100,7 @@ private:
     bool is_unstable;
     bool is_stable_edge;
 
-    DurationMode mode;
+    const DurationMode mode;
 
     typedef void (*CallbackPtr)(void);
     const uint8_t kMaxCallbacks = 8;

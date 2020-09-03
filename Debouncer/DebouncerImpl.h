@@ -57,7 +57,7 @@ private:
 
 public:
 
-    Debouncer(uint8_t pin, uint16_t duration_ms, Active active = Active::L, DurationFrom mode = DurationFrom::STABLE)
+    Debouncer(const uint8_t pin, const uint16_t duration_ms, const Active active = Active::L, const DurationFrom mode = DurationFrom::STABLE)
     : pin_target(pin)
     , duration_ms(duration_ms)
     , unstable_change_begin_ms(0xFFFFFFFF)
@@ -69,11 +69,11 @@ public:
     , mode(mode)
     {}
 
-    bool read() { return stable_state; }
+    bool read() const { return stable_state; }
 
-    bool edge() { return is_stable_edge; }
-    bool rising() { return (stable_state == HIGH) && is_stable_edge; }
-    bool falling() { return (stable_state == LOW) && is_stable_edge; }
+    bool edge() const { return is_stable_edge; }
+    bool rising() const { return (stable_state == HIGH) && is_stable_edge; }
+    bool falling() const { return (stable_state == LOW) && is_stable_edge; }
 
     void update()
     {
@@ -121,7 +121,7 @@ public:
         }
     }
 
-    void subscribe(Edge edge, CallbackType func)
+    void subscribe(const Edge edge, const CallbackType& func)
     {
         // TODO: std::multimap couldn't build on teensy...
         // callbacks.emplace(std::make_pair(edge, func));
@@ -131,8 +131,8 @@ public:
 private:
 
     const uint8_t pin_target;
+    const uint32_t duration_ms;
 
-    uint32_t duration_ms;
     uint32_t unstable_change_begin_ms;
     uint32_t unstable_change_end_ms;
 
@@ -141,7 +141,7 @@ private:
     bool is_unstable;
     bool is_stable_edge;
 
-    DurationFrom mode;
+    const DurationFrom mode;
 
     CallbackQueue callbacks;
 };
