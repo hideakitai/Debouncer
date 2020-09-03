@@ -2,18 +2,16 @@
     "name": "Debouncer",
     "keywords": "debounce,switch,lambda",
     "description": "Debounce library for Arduino",
-    "repository":
-    {
+    "repository": {
         "type": "git",
         "url": "https://github.com/hideakitai/Debouncer.git"
     },
-    "authors":
-    {
+    "authors": {
         "name": "Hideaki Tai",
         "url": "https://github.com/hideakitai",
         "maintainer": true
     },
-    "version": "0.1.0",
+    "version": "0.1.1",
     "license": "MIT",
     "frameworks": "arduino",
     "platforms": "*"
