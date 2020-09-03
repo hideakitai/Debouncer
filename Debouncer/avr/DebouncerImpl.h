@@ -25,13 +25,14 @@ public:
 
     void update()
     {
-        bool curr_state = digitalRead(pin_target);
+        const bool curr_state = digitalRead(pin_target);
         is_stable_edge = false;
+        const uint32_t now = millis();
 
         if (curr_state != prev_state)
         {
-            if (!is_unstable) unstable_change_begin_ms = millis();
-            unstable_change_end_ms = millis();
+            if (!is_unstable) unstable_change_begin_ms = now;
+            unstable_change_end_ms = now;
             is_unstable = true;
             prev_state = curr_state;
         }
@@ -43,7 +44,7 @@ public:
                 if (mode == kStable) prev_ms = unstable_change_end_ms;
                 else                 prev_ms = unstable_change_begin_ms;
 
-                if ((millis() - prev_ms) > duration)
+                if ((now - prev_ms) > duration)
                 {
                     if (is_unstable)
                     {
