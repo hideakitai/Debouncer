@@ -72,7 +72,7 @@ Debouncer debouncer(pin, duration, Debouncer::Active::L, Debouncer::DurationFrom
 
 ## Embedded Libraries
 
-- [ArxTypeTraits v0.2.0](https://github.com/hideakitai/ArxTypeTraits)
+- [ArxTypeTraits v0.2.1](https://github.com/hideakitai/ArxTypeTraits)
 - [ArxContainer v0.3.9](https://github.com/hideakitai/ArxContainer)
 - [TeensyDirtySTLErrorSolution v0.1.0](https://github.com/hideakitai/TeensyDirtySTLErrorSolution)
 
