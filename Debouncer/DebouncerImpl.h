@@ -2,57 +2,29 @@
 #ifndef DEBOUNCERIMPL_H
 #define DEBOUNCERIMPL_H
 
-#include <Arduino.h>
-#ifdef __AVR__
-#include "RingBuffer.h"
-#else
-#include <functional>
-// #include <map>
-#include <vector>
-#endif
-
-#ifdef TEENSYDUINO
-// dirty for teensy stl compile error
-// copied from https://github.com/gcc-mirror/
-namespace std
-{
-    void __throw_bad_function_call() { _GLIBCXX_THROW_OR_ABORT(bad_function_call()); }
-}
-#endif
-
-// hash expansion
-// namespace std
-// {
-//     template <typename T>
-//     struct hash
-//     {
-//         size_t operator() (T x) const noexcept
-//         {
-//             using type = typename underlying_type<T>::type;
-//             return hash<type>{}(static_cast<type>(x));
-//         }
-//     };
-// }
+#include "Debouncer/util/ArxTypeTraits/ArxTypeTraits.h"
+#include "Debouncer/util/ArxContainer/ArxContainer.h"
+#include "Debouncer/util/TeensyDirtySTLErrorSolution/TeensyDirtySTLErrorSolution.h"
 
 
 class Debouncer
 {
 public:
+
     enum class DurationFrom {STABLE, TRIGGER};
     enum class Edge {FALL, RISE};
     enum class Active {L, H};
 
 private:
-#ifdef __AVR__
-    typedef void (*CallbackType)(void);
-    struct Map { Edge key; CallbackType func; };
-    using CallbackQueue = RingBuffer<Map, 2>;
-#else
+
+#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L // Have libstdc++11
     using CallbackType = std::function<void(void)>;
     struct Map { Edge key; CallbackType func; };
-    // TODO: std::multimap couldn't build on teensy...
-    // using CallbackQueue = std::multimap<Edge, CallbackType>;
     using CallbackQueue = std::vector<Map>;
+#else
+    typedef void (*CallbackType)(void);
+    struct Map { Edge key; CallbackType func; };
+    using CallbackQueue = arx::vector<Map>;
 #endif
 
 public:
@@ -111,10 +83,6 @@ public:
                         if (rising())  edge = Edge::RISE;
                         else           edge = Edge::FALL;
 
-                        // TODO: std::multimap couldn't build on teensy...
-                        // auto p = callbacks.equal_range((bool)edge);
-                        // for (auto it = p.first; it != p.second; ++it) it->second();
-
                         for (auto& c : callbacks) if (edge == c.key) c.func();
                     }
                 }
@@ -124,8 +92,6 @@ public:
 
     void subscribe(const Edge edge, const CallbackType& func)
     {
-        // TODO: std::multimap couldn't build on teensy...
-        // callbacks.emplace(std::make_pair(edge, func));
         callbacks.push_back(Map({edge, func}));
     }
 
