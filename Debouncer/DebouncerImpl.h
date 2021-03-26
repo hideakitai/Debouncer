@@ -67,7 +67,18 @@ public:
     {
         const bool curr_state = digitalRead(pin_target);
         const uint32_t now = millis();
+        detectEdge(curr_state, now);
+    }
 
+    void subscribe(const Edge edge, const CallbackType& func)
+    {
+        callbacks.push_back(Map({edge, func}));
+    }
+
+private:
+
+    void detectEdge(const bool curr_state, const uint32_t now)
+    {
         is_stable_edge = false;
 
         if (curr_state != prev_state)
@@ -108,12 +119,6 @@ public:
             }
         }
     }
-
-    void subscribe(const Edge edge, const CallbackType& func)
-    {
-        callbacks.push_back(Map({edge, func}));
-    }
-
 };
 
 #endif // DEBOUNCERIMPL_H
