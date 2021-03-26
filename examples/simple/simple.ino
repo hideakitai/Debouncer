@@ -5,8 +5,18 @@ int debounce_duration_ms = 50;
 
 int rise_count = 0;
 int fall_count = 0;
+int change_count = 0;
 
+// default
 Debouncer debouncer(pin, debounce_duration_ms);
+// set active HIGH (switch off = LOW)
+// Debouncer debouncer(pin, debounce_duration_ms, Debouncer::Active::H);
+// set duraion from TRIGGER timing
+// Debouncer debouncer(pin, debounce_duration_ms, Debouncer::Active::L, Debouncer::DurationFrom::TRIGGER);
+
+void onRise() { Serial.println("onRise"); }
+void onFall() { Serial.println("onFall"); }
+void onChanged() { Serial.println("onChanged"); }
 
 void setup()
 {
@@ -15,31 +25,29 @@ void setup()
 
     delay(2000);
 
+    // add from lambda
+    debouncer.subscribe(Debouncer::Edge::FALL, [](){
+        Serial.print("fall : ");
+        Serial.println(fall_count++);
+    });
+    debouncer.subscribe(Debouncer::Edge::RISE, [](){
+        Serial.print("rise : ");
+        Serial.println(rise_count++);
+    });
+    debouncer.subscribe(Debouncer::Edge::CHANGED, [](){
+        Serial.print("changed : ");
+        Serial.println(change_count++);
+    });
+
+    // also you can add callback like this
+    debouncer.subscribe(Debouncer::Edge::FALL, onFall);
+    debouncer.subscribe(Debouncer::Edge::RISE, onRise);
+    debouncer.subscribe(Debouncer::Edge::CHANGED, onChanged);
+
     Serial.println("start");
 }
 
 void loop()
 {
     debouncer.update();
-
-    // Serial.print("current unstable state = ");
-    // Serial.println(digitalRead(pin));
-
-    // Serial.print("current stable state = ");
-    // Serial.println(debouncer.read());
-
-    if (debouncer.edge())
-    {
-        Serial.print("edge detect: ");
-        if (debouncer.rising())
-        {
-            Serial.print("rise : ");
-            Serial.println(rise_count++);
-        }
-        if (debouncer.falling())
-        {
-            Serial.print("fall : ");
-            Serial.println(fall_count++);
-        }
-    }
 }
