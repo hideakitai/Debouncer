@@ -12,7 +12,7 @@ class Debouncer
 public:
 
     enum class DurationFrom {STABLE, TRIGGER};
-    enum class Edge {FALL, RISE};
+    enum class Edge {FALL, RISE, CHANGED};
     enum class Active {L, H};
 
 private:
@@ -46,6 +46,7 @@ public:
     bool edge() const { return is_stable_edge; }
     bool rising() const { return (stable_state == HIGH) && is_stable_edge; }
     bool falling() const { return (stable_state == LOW) && is_stable_edge; }
+    bool changed() const { return edge(); }
 
     void update()
     {
@@ -83,7 +84,9 @@ public:
                         if (rising())  edge = Edge::RISE;
                         else           edge = Edge::FALL;
 
-                        for (auto& c : callbacks) if (edge == c.key) c.func();
+                        for (auto& c : callbacks)
+                            if ((c.key == Edge::CHANGED) || (edge == c.key))
+                                c.func();
                     }
                 }
             }

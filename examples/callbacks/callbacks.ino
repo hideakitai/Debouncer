@@ -5,6 +5,7 @@ int debounce_duration_ms = 50;
 
 int rise_count = 0;
 int fall_count = 0;
+int change_count = 0;
 
 Debouncer debouncer(pin, debounce_duration_ms);
 
@@ -26,6 +27,10 @@ void setup()
     debouncer.subscribe(Debouncer::Edge::RISE, [](){
         Serial.print("rise : ");
         Serial.println(rise_count++);
+    });
+    debouncer.subscribe(Debouncer::Edge::CHANGED, [](){
+        Serial.print("changed : ");
+        Serial.println(change_count++);
     });
 
     // also you can add callback like this

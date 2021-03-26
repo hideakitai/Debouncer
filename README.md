@@ -22,6 +22,9 @@ void setup()
     debouncer.subscribe(Debouncer::Edge::RISE, [](){
         // do something on rising edge
     });
+    debouncer.subscribe(Debouncer::Edge::CHANGED, [](){
+        // do something every edge
+    });
 }
 
 void loop()
@@ -69,6 +72,32 @@ Debouncer debouncer(pin, duration, Debouncer::Active::H); // active high (switch
 Debouncer debouncer(pin, duration); // check duration after signel becomes stable (default)
 Debouncer debouncer(pin, duration, Debouncer::Active::L, Debouncer::DurationFrom::TRIGGER); // check duration from first TRIGGER
 ```
+
+## APIs
+
+``` C++
+    Debouncer(const uint8_t pin, const uint16_t duration_ms, const Active active = Active::L, const DurationFrom mode = DurationFrom::STABLE);
+
+    bool read() const;
+    void update();
+
+    bool edge() const;
+    bool rising() const;
+    bool falling() const;
+    bool changed() const;
+
+    void subscribe(const Edge edge, const CallbackType& func);
+```
+
+## Parameters
+
+```C++
+enum class DurationFrom {STABLE, TRIGGER};
+enum class Edge {FALL, RISE, CHANGED};
+enum class Active {L, H};
+```
+
+
 
 ## Embedded Libraries
 
