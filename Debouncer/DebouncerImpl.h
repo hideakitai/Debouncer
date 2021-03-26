@@ -27,6 +27,21 @@ private:
     using CallbackQueue = arx::vector<Map>;
 #endif
 
+    const uint8_t pin_target;
+    const uint32_t duration_ms;
+
+    uint32_t unstable_change_begin_ms;
+    uint32_t unstable_change_end_ms;
+
+    bool stable_state;
+    bool prev_state;
+    bool is_unstable;
+    bool is_stable_edge;
+
+    const DurationFrom mode;
+
+    CallbackQueue callbacks;
+
 public:
 
     Debouncer(const uint8_t pin, const uint16_t duration_ms, const Active active = Active::L, const DurationFrom mode = DurationFrom::STABLE)
@@ -51,8 +66,9 @@ public:
     void update()
     {
         const bool curr_state = digitalRead(pin_target);
-        is_stable_edge = false;
         const uint32_t now = millis();
+
+        is_stable_edge = false;
 
         if (curr_state != prev_state)
         {
@@ -98,22 +114,6 @@ public:
         callbacks.push_back(Map({edge, func}));
     }
 
-private:
-
-    const uint8_t pin_target;
-    const uint32_t duration_ms;
-
-    uint32_t unstable_change_begin_ms;
-    uint32_t unstable_change_end_ms;
-
-    bool stable_state;
-    bool prev_state;
-    bool is_unstable;
-    bool is_stable_edge;
-
-    const DurationFrom mode;
-
-    CallbackQueue callbacks;
 };
 
 #endif // DEBOUNCERIMPL_H
