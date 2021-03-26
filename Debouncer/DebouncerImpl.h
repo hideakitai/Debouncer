@@ -18,17 +18,19 @@ public:
 private:
 
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L // Have libstdc++11
+    using StateFunc = std::function<bool(void)>;
     using CallbackType = std::function<void(void)>;
     struct Map { Edge key; CallbackType func; };
     using CallbackQueue = std::vector<Map>;
 #else
+    typedef bool (*StateFunc)(void);
     typedef void (*CallbackType)(void);
     struct Map { Edge key; CallbackType func; };
     using CallbackQueue = arx::vector<Map>;
 #endif
 
-    const uint8_t pin_target;
-    const uint32_t duration_ms;
+    uint8_t pin_target;
+    uint32_t duration_ms;
 
     uint32_t unstable_change_begin_ms;
     uint32_t unstable_change_end_ms;
@@ -41,10 +43,11 @@ private:
     const DurationFrom mode;
 
     CallbackQueue callbacks;
+    StateFunc state_func {nullptr};
 
 public:
 
-    Debouncer(const uint8_t pin, const uint16_t duration_ms, const Active active = Active::L, const DurationFrom mode = DurationFrom::STABLE)
+    Debouncer(const uint8_t pin, const uint32_t duration_ms, const Active active = Active::L, const DurationFrom mode = DurationFrom::STABLE)
     : pin_target(pin)
     , duration_ms(duration_ms)
     , unstable_change_begin_ms(0xFFFFFFFF)
@@ -56,6 +59,23 @@ public:
     , mode(mode)
     {}
 
+    Debouncer(const uint32_t duration_ms, const Active active = Active::L, const DurationFrom mode = DurationFrom::STABLE)
+    : pin_target(0xFF)
+    , duration_ms(duration_ms)
+    , unstable_change_begin_ms(0xFFFFFFFF)
+    , unstable_change_end_ms(0xFFFFFFFF)
+    , stable_state(!(bool)active)
+    , prev_state(!(bool)active)
+    , is_unstable(false)
+    , is_stable_edge(false)
+    , mode(mode)
+    {}
+
+    void duration(const uint32_t ms) { duration_ms = ms; }
+    uint32_t duration() const { return duration_ms; }
+
+    void stateFunc(const StateFunc& func) { pin_target = 0xFF; state_func = func; }
+
     bool read() const { return stable_state; }
 
     bool edge() const { return is_stable_edge; }
@@ -65,8 +85,15 @@ public:
 
     void update()
     {
-        const bool curr_state = digitalRead(pin_target);
         const uint32_t now = millis();
+        bool curr_state {false};
+        if (pin_target == 0xFF)
+            curr_state = digitalRead(pin_target);
+        else if (state_func)
+            curr_state = state_func();
+        else
+            Serial.println("Edge callback is not registered. Please register callback first");
+
         detectEdge(curr_state, now);
     }
 
