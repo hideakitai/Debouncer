@@ -35,8 +35,8 @@ private:
     uint32_t unstable_change_begin_ms;
     uint32_t unstable_change_end_ms;
 
-    bool stable_state;
-    bool prev_state;
+    int32_t stable_state;
+    int32_t prev_state;
     bool is_unstable;
     bool is_stable_edge;
 
@@ -64,8 +64,8 @@ public:
     , duration_ms(duration_ms)
     , unstable_change_begin_ms(0xFFFFFFFF)
     , unstable_change_end_ms(0xFFFFFFFF)
-    , stable_state(!(bool)active)
-    , prev_state(!(bool)active)
+    , stable_state(0)
+    , prev_state(0)
     , is_unstable(false)
     , is_stable_edge(false)
     , mode(mode)
@@ -79,14 +79,14 @@ public:
     bool read() const { return stable_state; }
 
     bool edge() const { return is_stable_edge; }
-    bool rising() const { return (stable_state == HIGH) && is_stable_edge; }
-    bool falling() const { return (stable_state == LOW) && is_stable_edge; }
+    bool rising() const { return (pin_target != 0xFF) && (stable_state == HIGH) && is_stable_edge; }
+    bool falling() const { return (pin_target != 0xFF) && (stable_state == LOW) && is_stable_edge; }
     bool changed() const { return edge(); }
 
     void update()
     {
         const uint32_t now = millis();
-        bool curr_state {false};
+        int32_t curr_state {false};
         if (pin_target != 0xFF)
             curr_state = digitalRead(pin_target);
         else if (state_func)
@@ -104,7 +104,7 @@ public:
 
 private:
 
-    void detectEdge(const bool curr_state, const uint32_t now)
+    void detectEdge(const int32_t curr_state, const uint32_t now)
     {
         is_stable_edge = false;
 
