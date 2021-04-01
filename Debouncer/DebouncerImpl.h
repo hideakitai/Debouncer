@@ -87,7 +87,7 @@ public:
     {
         const uint32_t now = millis();
         bool curr_state {false};
-        if (pin_target == 0xFF)
+        if (pin_target != 0xFF)
             curr_state = digitalRead(pin_target);
         else if (state_func)
             curr_state = state_func();
