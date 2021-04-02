@@ -38,6 +38,11 @@ void setup()
         Serial.print("changed : ");
         Serial.println(change_count++);
     });
+    // this simplified one can also be used to register callback to Edge::CHANGED
+    // debouncer.subscribe([](const int state){
+    //     Serial.print("changed : ");
+    //     Serial.println(change_count++);
+    // });
 
     // also you can add callback like this
     debouncer.subscribe(Debouncer::Edge::FALL, onFall);
