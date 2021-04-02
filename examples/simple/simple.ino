@@ -14,9 +14,9 @@ Debouncer debouncer(pin, debounce_duration_ms);
 // set duraion from TRIGGER timing
 // Debouncer debouncer(pin, debounce_duration_ms, Debouncer::Active::L, Debouncer::DurationFrom::TRIGGER);
 
-void onRise() { Serial.println("onRise"); }
-void onFall() { Serial.println("onFall"); }
-void onChanged() { Serial.println("onChanged"); }
+void onRise(const int state) { Serial.println("onRise"); }
+void onFall(const int state) { Serial.println("onFall"); }
+void onChanged(const int state) { Serial.println("onChanged"); }
 
 void setup()
 {
@@ -26,15 +26,15 @@ void setup()
     delay(2000);
 
     // add from lambda
-    debouncer.subscribe(Debouncer::Edge::FALL, [](){
+    debouncer.subscribe(Debouncer::Edge::FALL, [](const int state){
         Serial.print("fall : ");
         Serial.println(fall_count++);
     });
-    debouncer.subscribe(Debouncer::Edge::RISE, [](){
+    debouncer.subscribe(Debouncer::Edge::RISE, [](const int state){
         Serial.print("rise : ");
         Serial.println(rise_count++);
     });
-    debouncer.subscribe(Debouncer::Edge::CHANGED, [](){
+    debouncer.subscribe(Debouncer::Edge::CHANGED, [](const int state){
         Serial.print("changed : ");
         Serial.println(change_count++);
     });
