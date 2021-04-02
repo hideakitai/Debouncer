@@ -18,13 +18,13 @@ public:
 private:
 
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L // Have libstdc++11
-    using StateFunc = std::function<bool(void)>;
-    using CallbackType = std::function<void(void)>;
+    using StateFunc = std::function<int(void)>;
+    using CallbackType = std::function<void(const int)>;
     struct Map { Edge key; CallbackType func; };
     using CallbackQueue = std::vector<Map>;
 #else
-    typedef bool (*StateFunc)(void);
-    typedef void (*CallbackType)(void);
+    typedef int (*StateFunc)(void);
+    typedef void (*CallbackType)(const int);
     struct Map { Edge key; CallbackType func; };
     using CallbackQueue = arx::vector<Map>;
 #endif
@@ -35,8 +35,8 @@ private:
     uint32_t unstable_change_begin_ms;
     uint32_t unstable_change_end_ms;
 
-    int32_t stable_state;
-    int32_t prev_state;
+    int stable_state;
+    int prev_state;
     bool is_unstable;
     bool is_stable_edge;
 
@@ -59,7 +59,7 @@ public:
     , mode(mode)
     {}
 
-    Debouncer(const uint32_t duration_ms, const Active active = Active::L, const DurationFrom mode = DurationFrom::STABLE)
+    Debouncer(const uint32_t duration_ms, const DurationFrom mode = DurationFrom::STABLE)
     : pin_target(0xFF)
     , duration_ms(duration_ms)
     , unstable_change_begin_ms(0xFFFFFFFF)
@@ -74,7 +74,11 @@ public:
     void duration(const uint32_t ms) { duration_ms = ms; }
     uint32_t duration() const { return duration_ms; }
 
-    void stateFunc(const StateFunc& func) { pin_target = 0xFF; state_func = func; }
+    void stateFunc(const StateFunc& func, const int default_value = 0) {
+        pin_target = 0xFF;
+        state_func = func;
+        stable_state = prev_state = default_value;
+    }
 
     bool read() const { return stable_state; }
 
@@ -86,9 +90,9 @@ public:
     void update()
     {
         const uint32_t now = millis();
-        int32_t curr_state {false};
+        int curr_state {0};
         if (pin_target != 0xFF)
-            curr_state = digitalRead(pin_target);
+            curr_state = (int)digitalRead(pin_target);
         else if (state_func)
             curr_state = state_func();
         else
@@ -102,9 +106,14 @@ public:
         callbacks.push_back(Map({edge, func}));
     }
 
+    void subscribe(const CallbackType& func)
+    {
+        callbacks.push_back(Map({Edge::CHANGED, func}));
+    }
+
 private:
 
-    void detectEdge(const int32_t curr_state, const uint32_t now)
+    void detectEdge(const int curr_state, const uint32_t now)
     {
         is_stable_edge = false;
 
@@ -140,7 +149,7 @@ private:
 
                         for (auto& c : callbacks)
                             if ((c.key == Edge::CHANGED) || (edge == c.key))
-                                c.func();
+                                c.func(stable_state);
                     }
                 }
             }
