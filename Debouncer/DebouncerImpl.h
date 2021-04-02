@@ -74,7 +74,13 @@ public:
     void duration(const uint32_t ms) { duration_ms = ms; }
     uint32_t duration() const { return duration_ms; }
 
-    void stateFunc(const StateFunc& func, const int default_value = 0) {
+    void stateFunc(const StateFunc& func) {
+        pin_target = 0xFF;
+        state_func = func;
+        stable_state = prev_state = 0;
+    }
+
+    void stateFunc(const int default_value, const StateFunc& func) {
         pin_target = 0xFF;
         state_func = func;
         stable_state = prev_state = default_value;
