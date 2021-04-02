@@ -80,7 +80,7 @@ public:
         stable_state = prev_state = default_value;
     }
 
-    bool read() const { return stable_state; }
+    int read() const { return stable_state; }
 
     bool edge() const { return is_stable_edge; }
     bool rising() const { return (pin_target != 0xFF) && (stable_state == HIGH) && is_stable_edge; }
