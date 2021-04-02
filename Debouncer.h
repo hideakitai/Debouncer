@@ -4,4 +4,4 @@
 
 #include "Debouncer/DebouncerImpl.h"
 
-#endif // DEBOUNCER_H
+#endif  // DEBOUNCER_H

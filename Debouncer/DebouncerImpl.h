@@ -6,26 +6,38 @@
 #include "Debouncer/util/ArxContainer/ArxContainer.h"
 #include "Debouncer/util/TeensyDirtySTLErrorSolution/TeensyDirtySTLErrorSolution.h"
 
-
-class Debouncer
-{
+class Debouncer {
 public:
-
-    enum class DurationFrom {STABLE, TRIGGER};
-    enum class Edge {FALL, RISE, CHANGED};
-    enum class Active {L, H};
+    enum class DurationFrom {
+        STABLE,
+        TRIGGER
+    };
+    enum class Edge {
+        FALL,
+        RISE,
+        CHANGED
+    };
+    enum class Active {
+        L,
+        H
+    };
 
 private:
-
-#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L // Have libstdc++11
+#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
     using StateFunc = std::function<int(void)>;
     using CallbackType = std::function<void(const int)>;
-    struct Map { Edge key; CallbackType func; };
+    struct Map {
+        Edge key;
+        CallbackType func;
+    };
     using CallbackQueue = std::vector<Map>;
 #else
     typedef int (*StateFunc)(void);
     typedef void (*CallbackType)(const int);
-    struct Map { Edge key; CallbackType func; };
+    struct Map {
+        Edge key;
+        CallbackType func;
+    };
     using CallbackQueue = arx::vector<Map>;
 #endif
 
@@ -46,7 +58,6 @@ private:
     StateFunc state_func {nullptr};
 
 public:
-
     Debouncer(const uint8_t pin, const uint32_t duration_ms, const Active active = Active::L, const DurationFrom mode = DurationFrom::STABLE)
     : pin_target(pin)
     , duration_ms(duration_ms)
@@ -56,8 +67,7 @@ public:
     , prev_state(!(bool)active)
     , is_unstable(false)
     , is_stable_edge(false)
-    , mode(mode)
-    {}
+    , mode(mode) {}
 
     Debouncer(const uint32_t duration_ms, const DurationFrom mode = DurationFrom::STABLE)
     : pin_target(0xFF)
@@ -68,8 +78,7 @@ public:
     , prev_state(0)
     , is_unstable(false)
     , is_stable_edge(false)
-    , mode(mode)
-    {}
+    , mode(mode) {}
 
     void duration(const uint32_t ms) { duration_ms = ms; }
     uint32_t duration() const { return duration_ms; }
@@ -93,8 +102,7 @@ public:
     bool falling() const { return (pin_target != 0xFF) && (stable_state == LOW) && is_stable_edge; }
     bool changed() const { return edge(); }
 
-    void update()
-    {
+    void update() {
         const uint32_t now = millis();
         int curr_state {0};
         if (pin_target != 0xFF)
@@ -107,41 +115,33 @@ public:
         detectEdge(curr_state, now);
     }
 
-    void subscribe(const Edge edge, const CallbackType& func)
-    {
+    void subscribe(const Edge edge, const CallbackType& func) {
         callbacks.push_back(Map({edge, func}));
     }
 
-    void subscribe(const CallbackType& func)
-    {
+    void subscribe(const CallbackType& func) {
         callbacks.push_back(Map({Edge::CHANGED, func}));
     }
 
 private:
-
-    void detectEdge(const int curr_state, const uint32_t now)
-    {
+    void detectEdge(const int curr_state, const uint32_t now) {
         is_stable_edge = false;
 
-        if (curr_state != prev_state)
-        {
+        if (curr_state != prev_state) {
             if (!is_unstable) unstable_change_begin_ms = now;
             unstable_change_end_ms = now;
             is_unstable = true;
             prev_state = curr_state;
-        }
-        else
-        {
-            if (is_unstable)
-            {
+        } else {
+            if (is_unstable) {
                 uint32_t prev_ms;
-                if (mode == DurationFrom::STABLE) prev_ms = unstable_change_end_ms;
-                else                              prev_ms = unstable_change_begin_ms;
+                if (mode == DurationFrom::STABLE)
+                    prev_ms = unstable_change_end_ms;
+                else
+                    prev_ms = unstable_change_begin_ms;
 
-                if ((now - prev_ms) > duration_ms)
-                {
-                    if (is_unstable)
-                    {
+                if ((now - prev_ms) > duration_ms) {
+                    if (is_unstable) {
                         stable_state = prev_state;
                         is_stable_edge = true;
                         is_unstable = false;
@@ -150,8 +150,10 @@ private:
 
                         // execute callbacks
                         Edge edge;
-                        if (rising())  edge = Edge::RISE;
-                        else           edge = Edge::FALL;
+                        if (rising())
+                            edge = Edge::RISE;
+                        else
+                            edge = Edge::FALL;
 
                         for (auto& c : callbacks)
                             if ((c.key == Edge::CHANGED) || (edge == c.key))
@@ -163,4 +165,4 @@ private:
     }
 };
 
-#endif // DEBOUNCERIMPL_H
+#endif  // DEBOUNCERIMPL_H

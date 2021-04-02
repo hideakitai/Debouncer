@@ -24,26 +24,24 @@ Debouncer debouncer(pin, duration_ms);
 // set duraion from TRIGGER timing
 // Debouncer debouncer(pin, debounce_duration_ms, Debouncer::Active::L, Debouncer::DurationFrom::TRIGGER);
 
-void setup()
-{
+void setup() {
     // add from lambda
-    debouncer.subscribe(Debouncer::Edge::FALL, [](const int state){
+    debouncer.subscribe(Debouncer::Edge::FALL, [](const int state) {
         // do something on falling edge
     });
-    debouncer.subscribe(Debouncer::Edge::RISE, [](const int state){
+    debouncer.subscribe(Debouncer::Edge::RISE, [](const int state) {
         // do something on rising edge
     });
-    debouncer.subscribe(Debouncer::Edge::CHANGED, [](const int state){
+    debouncer.subscribe(Debouncer::Edge::CHANGED, [](const int state) {
         // do something every edge
     });
     // this simplified one can also be used to register callback to Edge::CHANGED
-    debouncer.subscribe([](const int state){
+    debouncer.subscribe([](const int state) {
         // do something every edge
     });
 }
 
-void loop()
-{
+void loop() {
     debouncer.update();
 }
 ```
@@ -51,27 +49,19 @@ void loop()
 ### Manual Operation
 
 ``` C++
-void loop()
-{
+void loop() {
     debouncer.update(); // you should update debouncer first
 
     Serial.print("current stable state = ");
     Serial.println(debouncer.read());
 
-    if (debouncer.edge()) // if edge is detected
-    {
-        if (debouncer.rising()) // if edge is rising
-        {
+    if (debouncer.edge()) {       // if edge is detected
+        if (debouncer.rising())   // if edge is rising
             Serial.print("rise");
-        }
-        if (debouncer.falling()) // if edge is falling
-        {
+        if (debouncer.falling())  // if edge is falling
             Serial.print("fall");
-        }
-        if (debouncer.changed()) // if edge is changed
-        {
+        if (debouncer.changed())  // if edge is changed
             Serial.print("changed");
-        }
     }
 }
 ```
