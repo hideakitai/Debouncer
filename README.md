@@ -4,7 +4,8 @@ Debounce library for Arduino
 
 - configurabale debounce duration, active low/high, and trigger origin
 - register callbacks to `Edge::FALL`, `Edge::RISE`, and `Edge::CHANGED`
-- custom state function (you can use `bool foo(void)` to detect state instead of `digitalRead(pin)`)
+- register custom state function to detect edge (instead of `digitalRead(pin)`)
+  - you can use `int custom_func(void)` to detect state instead of `digitalRead(pin)`
 
 ## Usage
 
@@ -26,13 +27,17 @@ Debouncer debouncer(pin, duration_ms);
 void setup()
 {
     // add from lambda
-    debouncer.subscribe(Debouncer::Edge::FALL, [](){
+    debouncer.subscribe(Debouncer::Edge::FALL, [](const int state){
         // do something on falling edge
     });
-    debouncer.subscribe(Debouncer::Edge::RISE, [](){
+    debouncer.subscribe(Debouncer::Edge::RISE, [](const int state){
         // do something on rising edge
     });
-    debouncer.subscribe(Debouncer::Edge::CHANGED, [](){
+    debouncer.subscribe(Debouncer::Edge::CHANGED, [](const int state){
+        // do something every edge
+    });
+    // this simplified one can also be used to register callback to Edge::CHANGED
+    debouncer.subscribe([](const int state){
         // do something every edge
     });
 }
@@ -77,33 +82,36 @@ void loop()
 #include <Debouncer.h>
 
 int debounce_duration_ms = 50;
-Debouncer debouncer(debounce_duration_ms);
+Debouncer debouncer(debounce_duration_ms); // do not specify pin number
 
-// you can use any state function which returns bool (and no args)
-bool customStateFunc() {
-    bool b = analogRead(A4);
-    return b;
+// you can use any state function which returns integer (with no args)
+int customStateFunc() {
+    int b0 = digitalRead(2);
+    int b1 = digitalRead(3);
+    int value = b0 | (b1 << 1); // value is 0, 1, 2, 3
+    return value;
 }
 
 void setup() {
-    Serial.begin(115200);
-    delay(2000);
+    pinMode(2, INPUT_PULLUP);
+    pinMode(3, INPUT_PULLUP);
 
-    // set your own state function which returns bool with no args
-    debouncer.stateFunc(customStateFunc);
+    // you can use any state function which returns int (and no args)
+    // instead of `digitalRead(pin)`
+    // debouncer.stateFunc([](){
+    //     int b0 = digitalRead(2);
+    //     int b1 = digitalRead(3);
+    //     int value = b0 | (b1 << 1);
+    //     return value;
+    // });
 
-    // add from lambda
-    debouncer.subscribe(Debouncer::Edge::FALL, []() {
-        Serial.println("fall");
+    // you can also set default value for custom state function
+    debouncer.stateFunc(3, []() {
+        int b0 = digitalRead(2);
+        int b1 = digitalRead(3);
+        int value = b0 | (b1 << 1);
+        return value;
     });
-    debouncer.subscribe(Debouncer::Edge::RISE, []() {
-        Serial.println("rise");
-    });
-    debouncer.subscribe(Debouncer::Edge::CHANGED, []() {
-        Serial.println("changed");
-    });
-
-    Serial.println("start");
 }
 
 void loop() {
@@ -125,6 +133,14 @@ Debouncer debouncer(pin, duration); // check duration after signel becomes stabl
 Debouncer debouncer(pin, duration, Debouncer::Active::L, Debouncer::DurationFrom::TRIGGER); // check duration from first TRIGGER
 ```
 
+### Custom State Function (without `digitalRead(pin)`)
+
+``` C++
+Debouncer debouncer(duration); // without specifying the pin, you can use custom state function
+Debouncer debouncer(duration, Debouncer::DurationFrom::TRIGGER); // duration mode can be changed
+```
+
+
 #### Limitation for AVR boards (like Uno and Mega)
 
 AVR boards can have only two callbacks. (see `examples/callbacks_uno_avr`)
@@ -132,24 +148,25 @@ AVR boards can have only two callbacks. (see `examples/callbacks_uno_avr`)
 
 ## APIs
 
-``` C++
-Debouncer(const uint8_t pin, const uint16_t duration_ms, const Active active = Active::L, const DurationFrom mode = DurationFrom::STABLE);
-Debouncer(const uint32_t duration_ms, const Active active = Active::L, const DurationFrom mode = DurationFrom::STABLE);
+```C++
+Debouncer(const uint8_t pin, const uint32_t duration_ms, const Active active = Active::L, const DurationFrom mode = DurationFrom::STABLE);
+Debouncer(const uint32_t duration_ms, const DurationFrom mode = DurationFrom::STABLE);
+
+void subscribe(const Edge edge, const CallbackType& func);
+void subscribe(const CallbackType& func);
+
+void stateFunc(const StateFunc& func);
+void stateFunc(const int default_value, const StateFunc& func);
 
 void duration(const uint32_t ms);
 uint32_t duration() const;
-
-void stateFunc(const StateFunc& func);
-
-bool read() const;
-void update();
-
+int read() const;
 bool edge() const;
 bool rising() const;
 bool falling() const;
 bool changed() const;
 
-void subscribe(const Edge edge, const CallbackType& func);
+void update();
 ```
 
 ## Parameters
