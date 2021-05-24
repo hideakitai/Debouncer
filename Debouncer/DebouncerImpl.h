@@ -41,70 +41,65 @@ private:
     using CallbackQueue = arx::vector<Map>;
 #endif
 
-    uint8_t pin_target;
-    uint32_t duration_on_ms;
-    uint32_t duration_off_ms;
-    uint32_t duration_ms;
-
-    uint32_t unstable_change_begin_ms;
-    uint32_t unstable_change_end_ms;
-
-    Active active_state;
-    int stable_state;
-    int prev_state;
-    bool is_unstable;
-    bool is_stable_edge;
-
-    const DurationFrom mode;
-
-    CallbackQueue callbacks;
+    // configurable variables
+    uint8_t pin_target {0xFF};
+    Active active_state {Active::L};
+    uint32_t duration_on_ms {50};
+    uint32_t duration_off_ms {50};
+    DurationFrom mode {DurationFrom::STABLE};
     StateFunc state_func {nullptr};
+    CallbackQueue callbacks;
+
+    // internal states
+    uint32_t duration_ms {50};
+    uint32_t unstable_change_begin_ms {0xFFFFFFFF};
+    uint32_t unstable_change_end_ms {0xFFFFFFFF};
+    int stable_state {0};
+    int prev_state {0};
+    bool is_unstable {false};
+    bool is_stable_edge {false};
 
 public:
-    Debouncer(const uint8_t pin, const uint32_t duration_on_ms, const uint32_t duration_off_ms, const Active active_state = Active::L, const DurationFrom mode = DurationFrom::STABLE)
+    Debouncer() {}
+
+    Debouncer(
+        const uint8_t pin,
+        const uint32_t duration_on_ms,
+        const uint32_t duration_off_ms,
+        const Active active_state = Active::L,
+        const DurationFrom mode = DurationFrom::STABLE)
     : pin_target(pin)
+    , active_state(active_state)
     , duration_on_ms(duration_on_ms)
     , duration_off_ms(duration_off_ms)
+    , mode(mode)
     , duration_ms(duration_on_ms)
-    , unstable_change_begin_ms(0xFFFFFFFF)
-    , unstable_change_end_ms(0xFFFFFFFF)
-    , active_state(active_state)
     , stable_state(!(bool)active_state)
-    , prev_state(!(bool)active_state)
-    , is_unstable(false)
-    , is_stable_edge(false)
-    , mode(mode) {}
+    , prev_state(!(bool)active_state) {}
 
-    Debouncer(const uint8_t pin, const uint32_t duration_ms, const Active active_state = Active::L, const DurationFrom mode = DurationFrom::STABLE)
+    Debouncer(
+        const uint8_t pin,
+        const uint32_t duration_ms,
+        const Active active_state = Active::L,
+        const DurationFrom mode = DurationFrom::STABLE)
     : pin_target(pin)
+    , active_state(active_state)
     , duration_on_ms(duration_ms)
     , duration_off_ms(duration_ms)
+    , mode(mode)
     , duration_ms(duration_ms)
-    , unstable_change_begin_ms(0xFFFFFFFF)
-    , unstable_change_end_ms(0xFFFFFFFF)
-    , active_state(active_state)
     , stable_state(!(bool)active_state)
-    , prev_state(!(bool)active_state)
-    , is_unstable(false)
-    , is_stable_edge(false)
-    , mode(mode) {}
+    , prev_state(!(bool)active_state) {}
 
     Debouncer(const uint32_t duration_ms, const DurationFrom mode = DurationFrom::STABLE)
     : pin_target(0xFF)
+    , active_state(Active::H)
     , duration_on_ms(duration_ms)
     , duration_off_ms(duration_ms)
+    , mode(mode)
     , duration_ms(duration_ms)
-    , unstable_change_begin_ms(0xFFFFFFFF)
-    , unstable_change_end_ms(0xFFFFFFFF)
-    , active_state(Active::H)
     , stable_state(0)
-    , prev_state(0)
-    , is_unstable(false)
-    , is_stable_edge(false)
-    , mode(mode) {}
-
-    void duration(const uint32_t ms) { duration_ms = ms; }
-    uint32_t duration() const { return duration_ms; }
+    , prev_state(0) {}
 
     void stateFunc(const StateFunc& func) {
         pin_target = 0xFF;
@@ -146,6 +141,16 @@ public:
     void subscribe(const CallbackType& func) {
         callbacks.push_back(Map({Edge::CHANGED, func}));
     }
+
+    void setTargetPin(const uint8_t pin) {
+        pin_target = pin;
+        state_func = nullptr;
+    }
+    void setActiveState(const Active state) { active_state = state; }
+    void setDuration(const uint32_t ms) { duration_on_ms = duration_off_ms = ms; }
+    void setDurationActivate(const uint32_t ms) { duration_on_ms = ms; }
+    void setDurationDeactivate(const uint32_t ms) { duration_off_ms = ms; }
+    void setDurationMode(const DurationFrom m) { mode = m; }
 
 private:
     void detectEdge(const int curr_state, const uint32_t now) {

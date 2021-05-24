@@ -114,6 +114,7 @@ void loop() {
 ``` C++
 Debouncer debouncer(pin, duration); // default is active low (switch off = high)
 Debouncer debouncer(pin, duration, Debouncer::Active::H); // active high (switch off = low)
+void setActiveState(const Active state);
 ```
 
 ### Debounce Mode
@@ -121,6 +122,7 @@ Debouncer debouncer(pin, duration, Debouncer::Active::H); // active high (switch
 ``` C++
 Debouncer debouncer(pin, duration); // check duration after signel becomes stable (default)
 Debouncer debouncer(pin, duration, Debouncer::Active::L, Debouncer::DurationFrom::TRIGGER); // check duration from first TRIGGER
+void setDurationMode(const DurationFrom m);
 ```
 
 ### Custom State Function (without `digitalRead(pin)`)
@@ -128,6 +130,8 @@ Debouncer debouncer(pin, duration, Debouncer::Active::L, Debouncer::DurationFrom
 ``` C++
 Debouncer debouncer(duration); // without specifying the pin, you can use custom state function
 Debouncer debouncer(duration, Debouncer::DurationFrom::TRIGGER); // duration mode can be changed
+void stateFunc(const StateFunc& func);
+void stateFunc(const int default_value, const StateFunc& func);
 ```
 
 
@@ -139,6 +143,8 @@ AVR boards can have only two callbacks. (see `examples/callbacks_uno_avr`)
 ## APIs
 
 ```C++
+Debouncer();
+Debouncer(const uint8_t pin, const uint32_t duration_on_ms, const uint32_t duration_off_ms, const Active active_state = Active::L, const DurationFrom mode = DurationFrom::STABLE);
 Debouncer(const uint8_t pin, const uint32_t duration_ms, const Active active = Active::L, const DurationFrom mode = DurationFrom::STABLE);
 Debouncer(const uint32_t duration_ms, const DurationFrom mode = DurationFrom::STABLE);
 
@@ -157,6 +163,13 @@ bool falling() const;
 bool changed() const;
 
 void update();
+
+void setTargetPin(const uint8_t pin);
+void setActiveState(const Active state);
+void setDuration(const uint32_t ms);
+void setDurationActivate(const uint32_t ms);
+void setDurationDeactivate(const uint32_t ms);
+void setDurationMode(const DurationFrom m);
 ```
 
 ## Parameters
