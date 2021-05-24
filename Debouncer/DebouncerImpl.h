@@ -42,11 +42,14 @@ private:
 #endif
 
     uint8_t pin_target;
+    uint32_t duration_on_ms;
+    uint32_t duration_off_ms;
     uint32_t duration_ms;
 
     uint32_t unstable_change_begin_ms;
     uint32_t unstable_change_end_ms;
 
+    Active active_state;
     int stable_state;
     int prev_state;
     bool is_unstable;
@@ -58,22 +61,42 @@ private:
     StateFunc state_func {nullptr};
 
 public:
-    Debouncer(const uint8_t pin, const uint32_t duration_ms, const Active active = Active::L, const DurationFrom mode = DurationFrom::STABLE)
+    Debouncer(const uint8_t pin, const uint32_t duration_on_ms, const uint32_t duration_off_ms, const Active active_state = Active::L, const DurationFrom mode = DurationFrom::STABLE)
     : pin_target(pin)
+    , duration_on_ms(duration_on_ms)
+    , duration_off_ms(duration_off_ms)
+    , duration_ms(duration_on_ms)
+    , unstable_change_begin_ms(0xFFFFFFFF)
+    , unstable_change_end_ms(0xFFFFFFFF)
+    , active_state(active_state)
+    , stable_state(!(bool)active_state)
+    , prev_state(!(bool)active_state)
+    , is_unstable(false)
+    , is_stable_edge(false)
+    , mode(mode) {}
+
+    Debouncer(const uint8_t pin, const uint32_t duration_ms, const Active active_state = Active::L, const DurationFrom mode = DurationFrom::STABLE)
+    : pin_target(pin)
+    , duration_on_ms(duration_ms)
+    , duration_off_ms(duration_ms)
     , duration_ms(duration_ms)
     , unstable_change_begin_ms(0xFFFFFFFF)
     , unstable_change_end_ms(0xFFFFFFFF)
-    , stable_state(!(bool)active)
-    , prev_state(!(bool)active)
+    , active_state(active_state)
+    , stable_state(!(bool)active_state)
+    , prev_state(!(bool)active_state)
     , is_unstable(false)
     , is_stable_edge(false)
     , mode(mode) {}
 
     Debouncer(const uint32_t duration_ms, const DurationFrom mode = DurationFrom::STABLE)
     : pin_target(0xFF)
+    , duration_on_ms(duration_ms)
+    , duration_off_ms(duration_ms)
     , duration_ms(duration_ms)
     , unstable_change_begin_ms(0xFFFFFFFF)
     , unstable_change_end_ms(0xFFFFFFFF)
+    , active_state(Active::H)
     , stable_state(0)
     , prev_state(0)
     , is_unstable(false)
@@ -105,9 +128,10 @@ public:
     void update() {
         const uint32_t now = millis();
         int curr_state {0};
-        if (pin_target != 0xFF)
+        if (pin_target != 0xFF) {
             curr_state = (int)digitalRead(pin_target);
-        else if (state_func)
+            duration_ms = (stable_state == (bool)active_state) ? duration_off_ms : duration_on_ms;
+        } else if (state_func)
             curr_state = state_func();
         else
             Serial.println("Edge callback is not registered. Please register callback first");
