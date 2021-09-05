@@ -49,6 +49,7 @@ private:
     DurationFrom mode {DurationFrom::STABLE};
     StateFunc state_func {nullptr};
     CallbackQueue callbacks;
+    bool b_active {true};
 
     // internal states
     uint32_t duration_ms {50};
@@ -151,9 +152,18 @@ public:
     void setDurationActivate(const uint32_t ms) { duration_on_ms = ms; }
     void setDurationDeactivate(const uint32_t ms) { duration_off_ms = ms; }
     void setDurationMode(const DurationFrom m) { mode = m; }
+    void setActive(const bool b) { b_active = b; }
+    bool isActive() const { return b_active; }
 
 private:
     void detectEdge(const int curr_state, const uint32_t now) {
+        if (!b_active) {
+            stable_state = 0;
+            prev_state = 0;
+            is_unstable = false;
+            is_stable_edge = false;
+            return;
+        }
         is_stable_edge = false;
 
         if (curr_state != prev_state) {

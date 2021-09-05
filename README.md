@@ -11,7 +11,7 @@ Debounce library for Arduino
 
 ### Simple Usage with Callbacks
 
-``` C++
+```C++
 #include <Debouncer.h>
 
 int pin = 2;
@@ -48,7 +48,7 @@ void loop() {
 
 ### Manual Operation
 
-``` C++
+```C++
 void loop() {
     debouncer.update(); // you should update debouncer first
 
@@ -111,7 +111,7 @@ void loop() {
 
 ### Active Low / High
 
-``` C++
+```C++
 Debouncer debouncer(pin, duration); // default is active low (switch off = high)
 Debouncer debouncer(pin, duration, Debouncer::Active::H); // active high (switch off = low)
 void setActiveState(const Active state);
@@ -119,7 +119,7 @@ void setActiveState(const Active state);
 
 ### Debounce Mode
 
-``` C++
+```C++
 Debouncer debouncer(pin, duration); // check duration after signel becomes stable (default)
 Debouncer debouncer(pin, duration, Debouncer::Active::L, Debouncer::DurationFrom::TRIGGER); // check duration from first TRIGGER
 void setDurationMode(const DurationFrom m);
@@ -127,18 +127,16 @@ void setDurationMode(const DurationFrom m);
 
 ### Custom State Function (without `digitalRead(pin)`)
 
-``` C++
+```C++
 Debouncer debouncer(duration); // without specifying the pin, you can use custom state function
 Debouncer debouncer(duration, Debouncer::DurationFrom::TRIGGER); // duration mode can be changed
 void stateFunc(const StateFunc& func);
 void stateFunc(const int default_value, const StateFunc& func);
 ```
 
-
 #### Limitation for AVR boards (like Uno and Mega)
 
 AVR boards can have only two callbacks. (see `examples/callbacks_uno_avr`)
-
 
 ## APIs
 
@@ -170,6 +168,8 @@ void setDuration(const uint32_t ms);
 void setDurationActivate(const uint32_t ms);
 void setDurationDeactivate(const uint32_t ms);
 void setDurationMode(const DurationFrom m);
+void setActive(const bool b);
+bool isActive() const;
 ```
 
 ## Parameters
@@ -180,14 +180,11 @@ enum class Edge {FALL, RISE, CHANGED};
 enum class Active {L, H};
 ```
 
-
-
 ## Embedded Libraries
 
 - [ArxTypeTraits v0.2.1](https://github.com/hideakitai/ArxTypeTraits)
 - [ArxContainer v0.3.14](https://github.com/hideakitai/ArxContainer)
 - [TeensyDirtySTLErrorSolution v0.1.0](https://github.com/hideakitai/TeensyDirtySTLErrorSolution)
-
 
 ## LICENSE
 
