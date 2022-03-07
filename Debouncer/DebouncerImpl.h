@@ -180,7 +180,7 @@ private:
                     prev_ms = unstable_change_begin_ms;
 
                 if ((now - prev_ms) > duration_ms) {
-                    if (is_unstable) {
+                    if (is_unstable && (stable_state != prev_state)) {
                         stable_state = prev_state;
                         is_stable_edge = true;
                         is_unstable = false;
