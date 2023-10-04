@@ -2,8 +2,8 @@
 #ifndef DEBOUNCERIMPL_H
 #define DEBOUNCERIMPL_H
 
-#include "Debouncer/util/ArxTypeTraits/ArxTypeTraits.h"
-#include "Debouncer/util/ArxContainer/ArxContainer.h"
+#include <ArxTypeTraits.h>
+#include <ArxContainer.h>
 #include "Debouncer/util/TeensyDirtySTLErrorSolution/TeensyDirtySTLErrorSolution.h"
 
 class Debouncer {

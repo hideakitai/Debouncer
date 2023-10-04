@@ -180,10 +180,13 @@ enum class Edge {FALL, RISE, CHANGED};
 enum class Active {L, H};
 ```
 
+## Dependent Libraries
+
+- [ArxContainer](https://github.com/hideakitai/ArxContainer)
+- [ArxTypeTraits](https://github.com/hideakitai/ArxTypeTraits)
+
 ## Embedded Libraries
 
-- [ArxTypeTraits v0.2.3](https://github.com/hideakitai/ArxTypeTraits)
-- [ArxContainer v0.4.0](https://github.com/hideakitai/ArxContainer)
 - [TeensyDirtySTLErrorSolution v0.1.0](https://github.com/hideakitai/TeensyDirtySTLErrorSolution)
 
 ## LICENSE
