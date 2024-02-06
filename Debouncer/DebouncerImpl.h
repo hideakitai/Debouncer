@@ -38,7 +38,7 @@ private:
         Edge key;
         CallbackType func;
     };
-    using CallbackQueue = arx::vector<Map>;
+    using CallbackQueue = arx::stdx::vector<Map>;
 #endif
 
     // configurable variables
